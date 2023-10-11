@@ -3607,20 +3607,113 @@ const dict: TDICOMDictionary = {
 	}
 }
 
-//Find the corresponding VR given a certain tag
+
+
+function arrayoftags() : Array<string>
+{
+	let array_tags : Array<string>=[];
+	for(const group_tag in Object.keys(dict))
+{
+	for(const element_tag in Object.keys(dict[group_tag]))
+	{
+     const tag_value=group_tag+element_tag;
+	 array_tags.push(tag_value);
+	}
+
+}
+    return array_tags;
+}
+
+
 function findVRfromTAG(dicomtag : string)
 {
+	
     const dicomtag_array: string[]=dicomtag.split(" ");
     const group_tag=dicomtag_array[0];
     const element_tag=dicomtag_array[1];
     const VR=dict[group_tag][element_tag][1];
     return VR;
+}
+
+const listVR_string : Array<string>=["AE","AS","CS","DA","DS","DT","IS","LO","LT","OB","OD","OF","OL","OV","OW","PN","SH","ST","TM","UC","UI","UR"];
+const listVR_number : Array<string>=["AT","FL","FD","SL","SQ","SS","SV","UL","US","UT","UV"];
+
+
+//non ha senso 
+       let array_tags =arrayoftags(); 
+	   export interface test{};
+
+      	for(const tag in array_tags)
+		{
+			const VR = findVRfromTAG(tag);
+	   
+	  		if (listVR_string.includes(VR))
+   			 {
+				interface MetaDataTypes extends test {tag: number};
+				}
+
+			else if (listVR_number.includes(VR))
+   			 {
+				interface MetaDataTypes extends test {tag: string};
+				
+			}
+   		}
+
+
+//non ha senso 
+type Totaldict = { [key in Object.keys(dict) + Object.keys(dict[key]): string] : [keyof T]}
+  
+  type Result = All<typeof >
+
+
+//metadata: { [key: string]: MetadataValue }
+export const parseTag = function (
+	dataSet: DataSet,
+	propertyName: string,
+	element: { [key: string]: any } // TODO-ts better type @szanchi
+  ) {
+	// GET VR
+	var tagData = dataSet.elements[propertyName] || {};
+  //cycle for on tags and metadata values in order to cast right 
+}
+
+type MetaDataTypes ={
 
 }
 
+type MetadataTypes = {
+	"00100008": number;
+	"00100010": string;
+  };
+  
+  function newParseTag<T>(tag: keyof MetadataTypes, metadata: string) {
+	const value = metadata as MetadataTypes[typeof tag];
+	// ... tutta la logica che sta attualmente in parseTag
+	return value as T;
+  }
+  
+  // con tag esplicito
+  newParseTag<MetadataTypes["00100010"]>("00100010", "Pippo"); //example name
+  newParseTag<MetadataTypes["00100008"]>("00100008", "12"); //example age 
+  
+  // con tag dinamico, come accade in parseDataSet
+  const tagKeyString = "00100010";
+  let metadata = "13";
+  newParseTag<MetadataTypes[typeof tagKeyString]>(tagKeyString,  metadata);
+  let metadata = "Pippo";
+  const tagKeyNumber = "00100008";
+  newParseTag<MetadataTypes[typeof tagKeyNumber]>(tagKeyNumber, metadata);
+
+
+  const tagKeyUnknown = "asd";
+  newParseTag<MetadataTypes[typeof tagKeyUnknown]>(tagKeyUnknown, metadata);
+
+  /*//Find the corresponding VR given a certain tag
+
+*/
+/*
 //MetadataType is still of type "any" but at use, the metadata can be casted to its real type (the one corresponding to the tag and VR) 
-const listVR_string : Array<string>=["AE","AS","CS","DA","DS","DT","IS","LO","LT","OB","OD","OF","OL","OV","OW","PN","SH","ST","TM","UC","UI","UR"];
-const listVR_number : Array<string>=["AT","FL","FD","SL","SQ","SS","SV","UL","US","UT","UV"];
+
 
 //from this point it has to be imported in scripts (functions or examples) of the library that require type casting of metadata
 for (const key in metadata) //cycle on metadata's keys 
@@ -3642,7 +3735,7 @@ for (const key in metadata) //cycle on metadata's keys
     }
 }
 
-export default { findVRfromTAG, listVR_string, listVR_number}; //dict, dictPrivate 
+export default { findVRfromTAG, listVR_string, listVR_number}; //dict, dictPrivate */
 
 
 //it is not possible to have dynamic types in typescript and this is the only option 
@@ -3665,7 +3758,7 @@ export default { findVRfromTAG, listVR_string, listVR_number}; //dict, dictPriva
 //1ST TRY: DYNAMIC TYPES -> FAILED
 /* 
 //interface or type directly 
-interface dictVRtotype
+interface metadatatype
 {
    AE : string,
    AS : string,
